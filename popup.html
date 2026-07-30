@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>SOOP 방송 시작 알리미</title>
+    <link rel="stylesheet" href="popup.css">
+  </head>
+  <body>
+    <main>
+      <header class="hero">
+        <div class="live-mark" aria-hidden="true"></div>
+        <div>
+          <h1>SOOP 방송 시작 알리미</h1>
+          <p>웨일 백그라운드 감시</p>
+        </div>
+      </header>
+
+      <div id="monitor-status" class="monitor-status">상태를 불러오는 중…</div>
+
+      <section>
+        <h2>스트리머 추가</h2>
+        <div class="add-grid">
+          <input id="new-id" type="text" maxlength="30" autocomplete="off" placeholder="스트리머 ID">
+          <input id="new-label" type="text" maxlength="40" autocomplete="off" placeholder="표시 이름 (선택)">
+          <button id="add-button" class="primary" type="button">추가</button>
+        </div>
+        <p class="example">예: 독고혜지_의 실제 스트리머 ID는 <code>dokkhye0000</code></p>
+      </section>
+
+      <section>
+        <div class="section-heading">
+          <h2>감시 목록</h2>
+          <span id="streamer-count" class="count"></span>
+        </div>
+        <div id="streamer-list" class="streamer-list"></div>
+      </section>
+
+      <section>
+        <h2>알림 설정</h2>
+        <div class="settings">
+          <label class="setting interval-setting">
+            <span>확인 주기</span>
+            <span class="inline-control">
+              <input id="interval" type="number" min="5" max="60" step="1">
+              <span>초</span>
+            </span>
+          </label>
+          <label class="setting">
+            <span>데스크톱 팝업</span>
+            <input id="desktop-notifications" type="checkbox">
+          </label>
+          <label class="setting">
+            <span>알림음</span>
+            <input id="sound-enabled" type="checkbox">
+          </label>
+        </div>
+        <p class="interval-help">10초를 권장합니다. 5초 설정은 스트리머 1명당 시간당 최대 720회 확인합니다.</p>
+      </section>
+
+      <div id="message" class="message" aria-live="polite"></div>
+
+      <footer>
+        <button id="test-button" class="secondary" type="button">알림 테스트</button>
+        <button id="check-button" class="secondary" type="button">지금 확인</button>
+        <button id="save-button" class="primary" type="button">설정 저장</button>
+      </footer>
+    </main>
+
+    <script src="popup.js"></script>
+  </body>
+</html>
