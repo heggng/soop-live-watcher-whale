@@ -6,6 +6,7 @@ const META_KEY = 'monitorMeta';
 const ALARM_NAME = 'soop-live-check';
 const API_URL = 'https://live.sooplive.com/afreeca/player_live_api.php';
 const PLAY_URL = 'https://play.sooplive.com/';
+const STATION_URL = 'https://www.sooplive.com/station/';
 const OFFSCREEN_PATH = 'offscreen.html';
 const NOTIFICATION_ICON_PATH = 'icon128.png';
 const FALLBACK_NOTIFICATION_ICON_PATH = 'icon48.png';
@@ -52,11 +53,13 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
 });
 
 chrome.notifications.onClicked.addListener((notificationId) => {
+  if (notificationId.startsWith('soop-post:')) { void openPostFromNotification(notificationId); return; }
   const streamerId = getStreamerIdFromNotification(notificationId);
   if (streamerId) void openStreamWindow(streamerId);
 });
 
 chrome.notifications.onButtonClicked.addListener((notificationId) => {
+  if (notificationId.startsWith('soop-post:')) { void openPostFromNotification(notificationId); return; }
   const streamerId = getStreamerIdFromNotification(notificationId);
   if (streamerId) void openStreamWindow(streamerId);
 });
@@ -169,6 +172,9 @@ async function checkAllStreamers() {
 
     for (const streamer of enabledStreamers) {
       states = await checkOneStreamer(streamer, config, states);
+      if (streamer.postEnabled !== false) {
+        states = await checkOnePost(streamer, config, states);
+      }
     }
 
     const now = Date.now();
@@ -275,6 +281,64 @@ async function checkOneStreamer(streamer, config, states) {
       },
     };
   }
+}
+
+async function checkOnePost(streamer, config, states) {
+  const previous = isPlainObject(states[streamer.id]) ? states[streamer.id] : {};
+  try {
+    const post = await requestLatestPost(streamer.id);
+    if (!post?.id) return states;
+    const nextState = { ...previous, latestPostId: post.id, latestPostTitle: post.title, latestPostUrl: post.url };
+    const isNewPost = Boolean(previous.latestPostId) && previous.notifiedPostId !== post.id;
+    if (isNewPost) {
+      nextState.notifiedPostId = post.id;
+      const nextStates = { ...states, [streamer.id]: nextState };
+      await storageSet({ [STATE_KEY]: nextStates });
+      try { await notifyPostCreated(streamer, post, config); } catch (error) { console.error('SOOP 게시글 알림 실패:', error); }
+      if (streamer.postAutoOpen !== false) {
+        try { await openPostWindow(streamer.id, post.url); } catch (error) { console.error('SOOP 게시글 창 열기 실패:', error); }
+      }
+      return nextStates;
+    }
+    return { ...states, [streamer.id]: nextState };
+  } catch (error) {
+    return { ...states, [streamer.id]: { ...previous, postLastError: errorMessage(error) } };
+  }
+}
+
+async function requestLatestPost(streamerId) {
+  const response = await fetch(`${STATION_URL}${encodeURIComponent(streamerId)}`, { cache: 'no-store', credentials: 'omit' });
+  if (!response.ok) throw new Error(`게시판 HTTP ${response.status}`);
+  const html = await response.text();
+  const links = [];
+  const pattern = /<a[^>]+href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
+  let match;
+  while ((match = pattern.exec(html))) {
+    const href = match[1].replace(/\\u0026/g, '&');
+    const text = match[2].replace(/<[^>]+>/g, ' ').replace(/\\u003c|\\u003e/g, '').replace(/\\n/g, ' ').trim();
+    if (/(?:board|post|notice|bbs|article)/i.test(href) && /(?:\d{3,}|b_no=|postNo=)/i.test(href)) {
+      links.push({ href, title: text || '새 게시글' });
+    }
+  }
+  if (links.length === 0) return null;
+  const latest = links[links.length - 1];
+  const url = new URL(latest.href, STATION_URL + streamerId).href;
+  const id = url.match(/(?:b_no|postNo|articleNo|boardNo)[=/]([0-9]+)/i)?.[1] || url;
+  return { id, title: latest.title.slice(0, 120), url };
+}
+
+async function notifyPostCreated(streamer, post, config) {
+  const displayName = streamer.label || streamer.id;
+  const failures = [];
+  if (config.desktopNotifications) {
+    try {
+      await createNotificationWithImageFallback(`soop-post:${encodeURIComponent(streamer.id)}:${encodeURIComponent(post.id)}`, {
+        type: 'basic', title: '📝 SOOP 새 게시글', message: `${displayName}\n${post.title}`, buttons: [{ title: '게시글 열기' }], priority: 2, requireInteraction: false, silent: true,
+      });
+    } catch (error) { failures.push(`팝업: ${errorMessage(error)}`); }
+  }
+  if (config.soundEnabled) { try { await playAlertSound(); } catch (error) { failures.push(`알림음: ${errorMessage(error)}`); } }
+  if (failures.length) throw new Error(failures.join(' / '));
 }
 
 async function requestChannelState(streamerId) {
@@ -470,6 +534,10 @@ async function openStreamWindow(streamerId) {
   });
 }
 
+async function openPostWindow(streamerId, discoveredUrl) {
+  await createWindow({ url: discoveredUrl || `${STATION_URL}${encodeURIComponent(streamerId)}`, type: 'normal', focused: true, width: 1280, height: 900 });
+}
+
 async function openSettingsWindow() {
   if (settingsWindowId !== null) {
     try {
@@ -502,6 +570,14 @@ function getStreamerIdFromNotification(notificationId) {
   } catch {
     return '';
   }
+}
+
+async function openPostFromNotification(notificationId) {
+  const encodedId = notificationId.split(':')[1] || '';
+  const streamerId = normalizeStreamerId(decodeURIComponent(encodedId));
+  const stored = await storageGet([STATE_KEY]);
+  const url = stored[STATE_KEY]?.[streamerId]?.latestPostUrl;
+  await openPostWindow(streamerId, url);
 }
 
 async function ensureAlarm() {
@@ -544,6 +620,8 @@ function normalizeConfig(value) {
           label: String(streamer?.label ?? '').trim().slice(0, 40),
           enabled: streamer?.enabled !== false,
           autoOpen: streamer?.autoOpen !== false,
+          postEnabled: streamer?.postEnabled !== false,
+          postAutoOpen: streamer?.postAutoOpen !== false,
         }))
         .filter((streamer) => {
           if (!isValidStreamerId(streamer.id) || seen.has(streamer.id)) return false;
