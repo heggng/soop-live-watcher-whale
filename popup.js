@@ -62,7 +62,7 @@ function syncControls() {
   elements.soundEnabled.checked = config.soundEnabled;
 }
 
-function addStreamer() {
+async function addStreamer() {
   const id = normalizeStreamerId(elements.newId.value);
   const label = elements.newLabel.value.trim().slice(0, 40);
 
@@ -77,9 +77,23 @@ function addStreamer() {
     return;
   }
 
+  let resolvedLabel = label;
+  if (!resolvedLabel) {
+    elements.addButton.disabled = true;
+    showMessage(`${id}의 SOOP 닉네임을 조회하는 중…`, '');
+    try {
+      const response = await sendMessage({ type: 'GET_STREAMER_NICK', id });
+      if (response?.ok && response.nickname) resolvedLabel = response.nickname.slice(0, 40);
+    } catch {
+      // 닉네임 조회에 실패해도 ID를 표시 이름으로 사용해 등록을 계속합니다.
+    } finally {
+      elements.addButton.disabled = false;
+    }
+  }
+
   draftStreamers.push({
     id,
-    label,
+    label: resolvedLabel || id,
     enabled: true,
     autoOpen: true,
   });

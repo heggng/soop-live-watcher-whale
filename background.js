@@ -78,6 +78,13 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
     return true;
   }
 
+  if (message.type === 'GET_STREAMER_NICK') {
+    void getStreamerNickname(message.id)
+      .then((nickname) => sendResponse({ ok: true, nickname }))
+      .catch((error) => sendResponse({ ok: false, error: errorMessage(error) }));
+    return true;
+  }
+
   if (message.type === 'SAVE_CONFIG') {
     void saveConfig(message.config)
       .then(() => {
@@ -308,6 +315,13 @@ async function requestChannelState(streamerId) {
     throw new Error('SOOP 응답에 CHANNEL 데이터가 없습니다.');
   }
   return payload.CHANNEL;
+}
+
+async function getStreamerNickname(streamerId) {
+  const id = normalizeStreamerId(streamerId);
+  if (!isValidStreamerId(id)) throw new Error('유효하지 않은 스트리머 ID입니다.');
+  const channel = await requestChannelState(id);
+  return String(channel.BJNICK || channel.NICKNAME || channel.USER_NICK || '').trim();
 }
 
 async function notifyBroadcastStarted(streamer, state, config) {
