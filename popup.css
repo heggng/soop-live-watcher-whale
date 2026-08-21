@@ -180,9 +180,9 @@ button:disabled {
 
 .streamer-card {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  grid-template-areas: "identity remove" "controls remove";
-  align-items: start;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  grid-template-areas: "identity controls remove";
+  align-items: center;
   padding: 8px 10px;
   border: 1px solid #e1dde6;
   border-radius: 11px;
@@ -277,19 +277,18 @@ button:disabled {
 
 .streamer-controls {
   grid-area: controls;
-  display: grid;
-  grid-template-columns: auto;
-  align-items: start;
-  gap: 4px;
-  margin-top: 7px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 4px 0 10px;
 }
 
 .streamer-controls .mini-toggle { min-height: 27px; }
 
 button.remove {
   grid-area: remove;
-  align-self: end;
-  margin: 0 4px 3px 12px;
+  align-self: center;
+  margin: 0 4px 0 3px;
 }
 
 .mini-toggle {
@@ -414,3 +413,12 @@ footer button:last-child {
     padding: 0 9px;
   }
 }
+  .streamer-card {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "identity remove" "controls controls";
+    row-gap: 5px;
+  }
+
+  .streamer-controls {
+    margin: 0;
+  }
