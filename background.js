@@ -321,7 +321,16 @@ async function getStreamerNickname(streamerId) {
   const id = normalizeStreamerId(streamerId);
   if (!isValidStreamerId(id)) throw new Error('유효하지 않은 스트리머 ID입니다.');
   const channel = await requestChannelState(id);
-  return String(channel.BJNICK || channel.NICKNAME || channel.USER_NICK || '').trim();
+  const liveNickname = String(channel.BJNICK || channel.NICKNAME || channel.USER_NICK || '').trim();
+  if (liveNickname) return liveNickname;
+
+  const response = await fetch(
+    `https://st.sooplive.com/api/get_station_status.php?szBjId=${encodeURIComponent(id)}`,
+    { cache: 'no-store', credentials: 'omit' },
+  );
+  if (!response.ok) throw new Error(`채널 정보 HTTP ${response.status}`);
+  const payload = await response.json();
+  return String(payload?.DATA?.user_nick || payload?.DATA?.user_nickname || '').trim();
 }
 
 async function notifyBroadcastStarted(streamer, state, config) {
