@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "SOOP 방송 시작 알리미",
-  "version": "2.3.3",
+  "version": "2.3.4",
   "description": "브라우저 백그라운드에서 SOOP 방송 시작을 감지해 알림을 표시하고 방송 창을 자동으로 엽니다.",
   "minimum_chrome_version": "109",
   "permissions": [
@@ -31,5 +31,8 @@
       "48": "icon48.png",
       "128": "icon128.png"
     }
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'; img-src 'self' data: https://stimg.sooplive.com https://profile.img.sooplive.com"
   }
 }

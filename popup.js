@@ -125,12 +125,32 @@ function renderStreamers() {
     top.className = 'streamer-top';
 
     const identity = document.createElement('div');
+    identity.className = 'streamer-identity';
+    const avatar = document.createElement('div');
+    avatar.className = 'streamer-avatar';
+    avatar.setAttribute('aria-hidden', 'true');
+    const avatarImage = document.createElement('img');
+    avatarImage.alt = '';
+    avatarImage.loading = 'lazy';
+    avatarImage.src = makeProfileImageUrl(streamer.id);
+    avatarImage.addEventListener('error', () => {
+      if (avatarImage.dataset.fallback !== '1') {
+        avatarImage.dataset.fallback = '1';
+        avatarImage.src = makeProfileImageFallbackUrl(streamer.id);
+      } else {
+        avatarImage.remove();
+        avatar.textContent = (streamer.label || streamer.id).slice(0, 1).toUpperCase();
+      }
+    });
+    avatar.append(avatarImage);
+    const details = document.createElement('div');
     const id = document.createElement('div');
     id.className = 'streamer-id';
     id.textContent = streamer.id;
     const status = document.createElement('div');
     applyStatus(status, broadcastStates[streamer.id]);
-    identity.append(id, status);
+    details.append(id, status);
+    identity.append(avatar, details);
 
     const removeButton = document.createElement('button');
     removeButton.type = 'button';
@@ -175,6 +195,16 @@ function renderStreamers() {
 function renderStreamerCount() {
   const enabledCount = draftStreamers.filter((streamer) => streamer.enabled).length;
   elements.streamerCount.textContent = `${enabledCount}/${draftStreamers.length}명 감시`;
+}
+
+function makeProfileImageUrl(streamerId) {
+  const id = encodeURIComponent(streamerId);
+  return `https://stimg.sooplive.com/LOGO/${streamerId.slice(0, 2)}/${id}/m/${id}.webp`;
+}
+
+function makeProfileImageFallbackUrl(streamerId) {
+  const id = encodeURIComponent(streamerId);
+  return `https://profile.img.sooplive.com/LOGO/${streamerId.slice(0, 2)}/${id}/m/${id}.jpg`;
 }
 
 function makeCheckboxLabel(text, checked, onChange) {
