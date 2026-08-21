@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "SOOP 방송 시작 알리미",
-  "version": "2.3.0",
-  "description": "브라우저 백그라운드에서 SOOP 방송과 새 게시글을 감지해 알림을 표시하고 페이지를 자동으로 엽니다.",
+  "version": "2.2.0",
+  "description": "브라우저 백그라운드에서 SOOP 방송 시작을 감지해 알림을 표시하고 방송 창을 자동으로 엽니다.",
   "minimum_chrome_version": "109",
   "permissions": [
     "alarms",
@@ -11,8 +11,7 @@
     "storage"
   ],
   "host_permissions": [
-    "https://live.sooplive.com/*",
-    "https://www.sooplive.com/*"
+    "https://live.sooplive.com/*"
   ],
   "background": {
     "service_worker": "background.js"

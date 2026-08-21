@@ -82,8 +82,6 @@ function addStreamer() {
     label,
     enabled: true,
     autoOpen: true,
-    postEnabled: true,
-    postAutoOpen: true,
   });
   elements.newId.value = '';
   elements.newLabel.value = '';
@@ -154,15 +152,7 @@ function renderStreamers() {
       },
     );
 
-    const postWatchLabel = makeCheckboxLabel('게시글 감시', streamer.postEnabled !== false, (checked) => {
-      streamer.postEnabled = checked;
-      renderStreamerCount();
-    });
-    const postAutoOpenLabel = makeCheckboxLabel('게시글 열기', streamer.postAutoOpen !== false, (checked) => {
-      streamer.postAutoOpen = checked;
-    });
-
-    controls.append(labelInput, watchLabel, autoOpenLabel, postWatchLabel, postAutoOpenLabel);
+    controls.append(labelInput, watchLabel, autoOpenLabel);
     card.append(top, controls);
     elements.streamerList.append(card);
   });
