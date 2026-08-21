@@ -166,6 +166,7 @@ function renderStreamers() {
     controls.className = 'streamer-controls';
 
     const labelInput = document.createElement('input');
+    labelInput.className = 'streamer-name';
     labelInput.type = 'text';
     labelInput.maxLength = 40;
     labelInput.placeholder = '표시 이름';
@@ -186,7 +187,8 @@ function renderStreamers() {
       },
     );
 
-    controls.append(labelInput, watchLabel, autoOpenLabel);
+    details.prepend(labelInput);
+    controls.append(watchLabel, autoOpenLabel);
     card.append(top, controls);
     elements.streamerList.append(card);
   });

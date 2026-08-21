@@ -179,6 +179,10 @@ button:disabled {
 }
 
 .streamer-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "identity remove" "controls remove";
+  align-items: start;
   padding: 8px 10px;
   border: 1px solid #e1dde6;
   border-radius: 11px;
@@ -186,17 +190,19 @@ button:disabled {
 }
 
 .streamer-top {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  align-items: start;
-  gap: 8px;
+  display: contents;
 }
 
 .streamer-identity {
+  grid-area: identity;
   display: flex;
   min-width: 0;
   align-items: center;
   gap: 7px;
+}
+
+.streamer-identity > div:last-child {
+  min-width: 0;
 }
 
 .streamer-avatar {
@@ -229,6 +235,31 @@ button:disabled {
   white-space: nowrap;
 }
 
+.streamer-identity input.streamer-name {
+  display: inline-block;
+  width: auto;
+  max-width: 130px;
+  height: 25px;
+  margin: 0 7px 0 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  vertical-align: middle;
+}
+
+.streamer-identity input.streamer-name:focus {
+  box-shadow: none;
+  border-bottom: 1px solid #7150ee;
+}
+
+.streamer-identity .streamer-id {
+  display: inline-block;
+  vertical-align: middle;
+}
+
 .streamer-status {
   margin-top: 2px;
   color: #77717f;
@@ -245,15 +276,20 @@ button:disabled {
 }
 
 .streamer-controls {
+  grid-area: controls;
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto auto;
-  align-items: center;
-  gap: 8px;
-  margin-top: 5px;
+  grid-template-columns: auto;
+  align-items: start;
+  gap: 4px;
+  margin-top: 7px;
 }
 
-.streamer-controls input[type="text"] {
-  height: 31px;
+.streamer-controls .mini-toggle { min-height: 27px; }
+
+button.remove {
+  grid-area: remove;
+  align-self: end;
+  margin: 0 4px 3px 12px;
 }
 
 .mini-toggle {
@@ -354,9 +390,6 @@ footer button:last-child {
     grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) auto;
   }
 
-  .streamer-controls {
-    grid-template-columns: minmax(220px, 1fr) auto auto;
-  }
 }
 
 @media (max-width: 520px) {
@@ -370,10 +403,6 @@ footer button:last-child {
 
   .add-grid button {
     width: 100%;
-  }
-
-  .streamer-controls {
-    grid-template-columns: 1fr auto auto;
   }
 
   footer {
