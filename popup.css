@@ -179,7 +179,7 @@ button:disabled {
 }
 
 .streamer-card {
-  padding: 11px;
+  padding: 8px 10px;
   border: 1px solid #e1dde6;
   border-radius: 11px;
   background: #fff;
@@ -196,14 +196,14 @@ button:disabled {
   display: flex;
   min-width: 0;
   align-items: center;
-  gap: 9px;
+  gap: 7px;
 }
 
 .streamer-avatar {
   display: grid;
-  width: 42px;
-  height: 42px;
-  flex: 0 0 42px;
+  width: 36px;
+  height: 36px;
+  flex: 0 0 36px;
   place-items: center;
   overflow: hidden;
   border: 1px solid #e0d8f6;
@@ -230,7 +230,7 @@ button:disabled {
 }
 
 .streamer-status {
-  margin-top: 4px;
+  margin-top: 2px;
   color: #77717f;
   font-size: 11px;
 }
@@ -248,8 +248,8 @@ button:disabled {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto auto;
   align-items: center;
-  gap: 9px;
-  margin-top: 9px;
+  gap: 8px;
+  margin-top: 5px;
 }
 
 .streamer-controls input[type="text"] {
